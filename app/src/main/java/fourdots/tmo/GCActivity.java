@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -90,6 +91,7 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 	{
 		TextView tv = (TextView) findViewById(R.id.string_username);
 		tv.setText(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getDisplayName());
+		showLikes();
 	}
 
 	@Override
@@ -129,5 +131,21 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 				mGoogleApiClient.connect();
 			}
 		}
+	}
+
+	private void showLikes()
+	{
+		RelativeLayout mLayout = (RelativeLayout) findViewById(R.id.rel_layout);
+		mLayout.addView(createNewTextView(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getUrl()));
+	}
+
+	private View createNewTextView(String t)
+	{
+		final TextView textView = new TextView(this);
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		params.addRule(RelativeLayout.BELOW, R.id.string_username);
+		textView.setLayoutParams(params);
+		textView.setText(t);
+		return textView;
 	}
 }
