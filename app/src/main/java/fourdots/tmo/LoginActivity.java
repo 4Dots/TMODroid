@@ -70,7 +70,6 @@ public class LoginActivity extends ActionBarActivity implements OnClickListener
 	{
 		if (view.getId() == R.id.sign_in_button)
 		{
-			Toast.makeText(this, "Starting GC A", Toast.LENGTH_LONG).show();
 			Intent i = new Intent(this, GCActivity.class);
 			startActivity(i);
 		}

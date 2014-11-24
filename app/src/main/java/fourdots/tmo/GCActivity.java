@@ -4,15 +4,23 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.plus.Plus;
+
+import java.io.IOException;
 
 
 public class GCActivity extends Activity implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -41,10 +49,12 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 		super.onStart();
 		mGoogleApiClient.connect();
 		findViewById(R.id.button_logout).setOnClickListener(this);
+		findViewById(R.id.button_server_token).setOnClickListener(this);
 	}
 
 	public void onStop()
 	{
+		super.onStop();
 		if (mGoogleApiClient.isConnected())
 		{
 			mGoogleApiClient.disconnect();
@@ -82,16 +92,58 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 	{
 		if (v.getId() == R.id.button_logout)
 		{
-			finish();
+			if (mGoogleApiClient.isConnected())
+			{
+				Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+				Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient)
+						.setResultCallback(new ResultCallback<Status>()
+						{
+
+							@Override
+							public void onResult(Status status)
+							{
+								onStop();
+							}
+						});
+			}
+			else
+			{
+				onStop();
+			}
+		}
+		if (v.getId() == R.id.button_server_token)
+		{
+			new Thread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					getServToken();
+				}
+			}).start();
 		}
 	}
 
 	@Override
 	public void onConnected(Bundle bundle)
 	{
-		TextView tv = (TextView) findViewById(R.id.string_username);
-		tv.setText(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getDisplayName());
-		showLikes();
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						TextView tv = (TextView) findViewById(R.id.string_username);
+						tv.setText(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getDisplayName());
+					}
+				});
+				showLikes();
+			}
+		}).start();
 	}
 
 	@Override
@@ -110,7 +162,8 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 				mIntentInProgress = true;
 				startIntentSenderForResult(result.getResolution().getIntentSender(),
 						RC_SIGN_IN, null, 0, 0, 0);
-			} catch (IntentSender.SendIntentException e)
+			}
+			catch (IntentSender.SendIntentException e)
 			{
 				// The intent was canceled before it was sent.  Return to the default
 				// state and attempt to connect to get an updated ConnectionResult.
@@ -135,8 +188,15 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 
 	private void showLikes()
 	{
-		RelativeLayout mLayout = (RelativeLayout) findViewById(R.id.rel_layout);
-		mLayout.addView(createNewTextView(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getUrl()));
+		runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				RelativeLayout mLayout = (RelativeLayout) findViewById(R.id.rel_layout);
+				mLayout.addView(createNewTextView(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getUrl()));
+			}
+		});
 	}
 
 	private View createNewTextView(String t)
@@ -147,5 +207,53 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 		textView.setLayoutParams(params);
 		textView.setText(t);
 		return textView;
+	}
+
+	private String getServToken()
+	{
+		String accessToken = null;
+		Bundle appActivities = new Bundle();
+		appActivities.putString(GoogleAuthUtil.KEY_REQUEST_VISIBLE_ACTIVITIES,
+				"GCActivity");
+		String scopes = "https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
+		try
+		{
+			Log.e("ServTKN", "PRE TKN RQT");
+			accessToken = GoogleAuthUtil.getToken(
+					this,
+					Plus.AccountApi.getAccountName(mGoogleApiClient),
+					"oauth2:server:client_id:885039176328-ngt3bk080t47iv2firvl2a9qr3dvj9si.apps.googleusercontent.com:api_scope:" + scopes
+			);
+			Log.e("ServTKN", "POST TKN RQT");
+			Log.e("ServTKN", accessToken);
+		}
+		catch (IOException transientEx)
+		{
+			// network or server error, the call is expected to succeed if you try again later.
+			// Don't attempt to call again immediately - the request is likely to
+			// fail, you'll hit quotas or back-off.
+			throw new RuntimeException(transientEx);
+		}
+		catch (UserRecoverableAuthException e)
+		{
+			// Requesting an authorization code will always throw
+			// UserRecoverableAuthException on the first call to GoogleAuthUtil.getToken
+			// because the user must consent to offline access to their data.  After
+			// consent is granted control is returned to your activity in onActivityResult
+			// and the second call to GoogleAuthUtil.getToken will succeed.
+			Log.e("Token", "UR Token Exception", e);
+			startActivityForResult(e.getIntent(), RC_SIGN_IN);
+		}
+		catch (GoogleAuthException authEx)
+		{
+			Log.e("Token", "GAuthToken Exception", authEx);
+			throw new RuntimeException(authEx);
+		}
+		catch (Exception e)
+		{
+			Log.e("Token", "Token Exception", e);
+			throw new RuntimeException(e);
+		}
+		return accessToken;
 	}
 }
