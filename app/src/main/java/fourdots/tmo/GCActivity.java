@@ -1,8 +1,11 @@
 package fourdots.tmo;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -10,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -20,7 +24,13 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.plus.Plus;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Objects;
 
 
 public class GCActivity extends Activity implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -29,6 +39,7 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 	private static final int RC_SIGN_IN = 0;
 	private GoogleApiClient mGoogleApiClient;
 	private boolean mIntentInProgress;
+	String accessToken;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -142,6 +153,21 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 					}
 				});
 				showLikes();
+				while (accessToken == null || accessToken == "")
+				{
+					try
+					{
+						synchronized (this)
+						{
+							wait(15000);
+						}
+						getServToken();
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
 			}
 		}).start();
 	}
@@ -211,21 +237,22 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 
 	private String getServToken()
 	{
-		String accessToken = null;
+		accessToken = null;
 		Bundle appActivities = new Bundle();
-		appActivities.putString(GoogleAuthUtil.KEY_REQUEST_VISIBLE_ACTIVITIES,
-				"GCActivity");
+		appActivities.putString(GoogleAuthUtil.KEY_REQUEST_VISIBLE_ACTIVITIES, "GCActivity");
 		String scopes = "https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
 		try
 		{
 			Log.e("ServTKN", "PRE TKN RQT");
-			accessToken = GoogleAuthUtil.getToken(
+			accessToken = GoogleAuthUtil.getToken
+			(
 					this,
 					Plus.AccountApi.getAccountName(mGoogleApiClient),
 					"oauth2:server:client_id:885039176328-ngt3bk080t47iv2firvl2a9qr3dvj9si.apps.googleusercontent.com:api_scope:" + scopes
 			);
 			Log.e("ServTKN", "POST TKN RQT");
 			Log.e("ServTKN", accessToken);
+			doHTTPRequest(accessToken);
 		}
 		catch (IOException transientEx)
 		{
@@ -255,5 +282,64 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 			throw new RuntimeException(e);
 		}
 		return accessToken;
+	}
+
+	private void doHTTPRequest(String tokenURL)
+	{
+		ConnectivityManager connMgr = (ConnectivityManager)	getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+		if (networkInfo != null && networkInfo.isConnected())
+		{
+			try
+			{
+				InputStream is = null;
+				URL url = new URL("http://tmo.herokuapp.com/?oauth=" + tokenURL);
+				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+				conn.setReadTimeout(10000);
+				conn.setConnectTimeout(15000);
+				conn.setDoInput(true);
+				conn.connect();
+				int resp = conn.getResponseCode();
+				Log.d("DBG","The response code is:" + resp);
+				is = conn.getInputStream();
+
+				String response = getStringBR(new BufferedReader(new InputStreamReader(is)));
+				Log.e("DBG TKN",response);
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			finally
+			{
+			}
+		}
+		else
+		{
+			Toast.makeText(this, "La solicitud no se puede procesar", Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private String getStringBR(BufferedReader bufferedReader)
+	{
+		StringBuilder sb = new StringBuilder();
+		String line;
+		try
+		{
+			if (bufferedReader != null)
+			{
+				while ((line = bufferedReader.readLine()) != null)
+				{
+					sb.append(line);
+				}
+				bufferedReader.close();
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return sb.toString();
 	}
 }
