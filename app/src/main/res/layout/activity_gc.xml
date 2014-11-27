@@ -14,9 +14,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/hello_world"
+        android:layout_marginTop="148dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="53dp"/>
+        android:layout_centerHorizontal="true"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -32,9 +32,17 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/app_name"
         android:id="@+id/string_username"
-        android:layout_marginTop="138dp"
-        android:layout_gravity="center"
+        android:layout_marginTop="29dp"
         android:layout_below="@+id/hello_world"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/txtview_loadingTMO"
+        android:id="@+id/textView"
+        android:layout_marginTop="47dp"
+        android:layout_below="@+id/string_username"
         android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>

@@ -131,15 +131,6 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 			@Override
 			public void run()
 			{
-				runOnUiThread(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						TextView tv = (TextView) findViewById(R.id.string_username);
-						tv.setText(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getDisplayName());
-					}
-				});
 				showLikes();
 				while (accessToken == null || accessToken == "")
 				{

@@ -2,15 +2,15 @@
 <resources>
 
     <string name="app_name">TMO</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="hello_world">Hola</string>
     <string name="action_settings">Settings</string>
-    <string name="welcome_TMO">Bienvenue à Tu Mejor Opción</string>
-    <string name="button_logout">Logout</string>
+    <string name="welcome_TMO">Bienvenido a Tu Mejor Opción</string>
+    <string name="button_logout">Cerrar Sesión</string>
     <string name="title_activity_gift_cert">GiftCertActivity</string>
     <string name="title_activity_gc">GCActivity</string>
     <string name="title_activity_comprar_b">ComprarBActivity</string>
     <string name="button_send_gc">Enviar Bono</string>
     <string name="txtfield_valor">Ingrese el valor</string>
     <string name="txtfield_email">Ingrese el email</string>
-
+    <string name="txtview_loadingTMO">Estamos cargando la información ...</string>
 </resources>

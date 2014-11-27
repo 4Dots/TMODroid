@@ -11,15 +11,15 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/welcome_TMO"
         android:id="@+id/String_Welcome"
-        android:layout_marginTop="34dp"
-        android:layout_centerHorizontal="true" />
+        android:layout_above="@+id/sign_in_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="93dp"/>
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="68dp"
-        android:layout_below="@+id/String_Welcome"
+        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>
