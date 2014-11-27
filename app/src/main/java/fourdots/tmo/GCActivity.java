@@ -60,7 +60,6 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 		super.onStart();
 		mGoogleApiClient.connect();
 		findViewById(R.id.button_logout).setOnClickListener(this);
-		findViewById(R.id.button_server_token).setOnClickListener(this);
 	}
 
 	public void onStop()
@@ -122,17 +121,6 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 				onStop();
 			}
 		}
-		if (v.getId() == R.id.button_server_token)
-		{
-			new Thread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					getServToken();
-				}
-			}).start();
-		}
 	}
 
 	@Override
@@ -157,17 +145,18 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 				{
 					try
 					{
+						getServToken();
 						synchronized (this)
 						{
 							wait(15000);
 						}
-						getServToken();
 					}
 					catch (Exception e)
 					{
 						e.printStackTrace();
 					}
 				}
+				doHTTPRequest(accessToken);
 			}
 		}).start();
 	}
@@ -252,7 +241,6 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 			);
 			Log.e("ServTKN", "POST TKN RQT");
 			Log.e("ServTKN", accessToken);
-			doHTTPRequest(accessToken);
 		}
 		catch (IOException transientEx)
 		{
@@ -305,6 +293,9 @@ public class GCActivity extends Activity implements View.OnClickListener, Google
 
 				String response = getStringBR(new BufferedReader(new InputStreamReader(is)));
 				Log.e("DBG TKN",response);
+				Intent i = new Intent(this,ComprarBActivity.class);
+				i.putExtra("json",response);
+				startActivity(i);
 			}
 			catch (IOException e)
 			{

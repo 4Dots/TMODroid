@@ -1,0 +1,62 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                tools:context="fourdots.tmo.ComprarBActivity">
+
+    <TextView
+        android:text="@string/welcome_TMO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tmo_welcome"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"/>
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner_tiendas"
+        android:nestedScrollingEnabled="true"
+        android:layout_below="@+id/tmo_welcome"
+        android:layout_marginTop="40dp"
+        android:layout_alignLeft="@+id/txtfield_email"
+        android:layout_alignStart="@+id/txtfield_email"
+        android:layout_alignRight="@+id/txtfield_email"
+        android:layout_alignEnd="@+id/txtfield_email"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textEmailAddress"
+        android:ems="10"
+        android:id="@+id/txtfield_email"
+        android:layout_marginTop="44dp"
+        android:layout_below="@+id/spinner_tiendas"
+        android:layout_alignRight="@+id/txtfield_price"
+        android:layout_alignEnd="@+id/txtfield_price"
+        android:hint="@string/txtfield_email"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/txtfield_price"
+        android:layout_below="@+id/txtfield_email"
+        android:layout_centerHorizontal="true"
+        android:hint="@string/txtfield_valor"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send_gc"
+        android:id="@+id/button_send_gc"
+        android:layout_marginTop="74dp"
+        android:layout_below="@+id/txtfield_price"
+        android:layout_centerHorizontal="true"/>
+
+</RelativeLayout>

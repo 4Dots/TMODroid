@@ -33,6 +33,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="fourdots.tmo.LoginActivity" />
         </activity>
+        <activity
+            android:name="fourdots.tmo.ComprarBActivity"
+            android:label="@string/title_activity_comprar_b"
+            android:parentActivityName="fourdots.tmo.GCActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="fourdots.tmo.GCActivity" />
+        </activity>
     </application>
 
 </manifest>
